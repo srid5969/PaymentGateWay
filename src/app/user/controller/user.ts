@@ -1,5 +1,5 @@
 import { HttpStatus, inject } from "@leapjs/common";
-import { Controller, Get, Post, Req, Res, UseBefore } from "@leapjs/router";
+import { Body, Controller, Get, Post, Req, Res, UseBefore } from "@leapjs/router";
 import { Request, Response } from "express";
 import { UserService } from "../service/user";
 import validate from "common/middleware/validator";
@@ -9,19 +9,26 @@ import { User } from 'app/user/model/user';
 export class UserController {
   @inject(() => UserService) userService!: UserService;
   @Get("/")
-  public async helloWorld(
-    @Req() req: Request,
+  public async userDetail(
+    @Req() req: any,
     @Res() res: Response
   ): Promise<Response> {
-    // Logger
-    return new Promise<Response>(async (resolve) => {
-      resolve(res.json(await this.userService.helloWorld()));
-    });
+    try {
+      const data = await this.userService.getUserDetailUsingId(req.user)
+      return data.code ? res.status(data.code).json(data) : res.status(HttpStatus.ACCEPTED).send(data);
+    } catch (error: any) {
+      return error.code ? res.status(error.code).json(error) : res.status(HttpStatus.CONFLICT).send(error);
+    }  
   }
   @Post("/login")
-  public async login(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    return res.send("hello")
-  }
+  @UseBefore(validate(User,["login"]))
+  public async login(@Body() req: any, @Res() res: Response): Promise<Response> {
+    try {
+      const data = await this.userService.login(req.phone,req.pone);
+      return data.code ? res.status(data.code).json(data) : res.status(HttpStatus.ACCEPTED).send(data);
+    } catch (error: any) {
+      return error.code ? res.status(error.code).json(error) : res.status(HttpStatus.CONFLICT).send(error);
+    }  }
   @Post("/signup")
   @UseBefore(validate(User,["create"]))
   public async signUp(

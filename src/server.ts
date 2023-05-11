@@ -1,11 +1,11 @@
 
-
+import "module-alias/register";
+import "reflect-metadata";
 import { Logger, expandObject } from "@leapjs/common";
 import bootstrap from "app/app";
 import { isValid } from "configuration/helpers";
 import { configurations as configuration } from "configuration/manager";
-import "module-alias/register";
-import "reflect-metadata";
+
 
 function main(): void {
 	configuration

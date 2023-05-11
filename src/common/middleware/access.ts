@@ -80,14 +80,20 @@ export class AuthMiddleware {
 							.status(401);
 					}
 					const token: string[] = req.headers.authorization.split(" ") || "";
+					
+					
 					if (token[1]) {
+						console.log(req.headers.authorization,"----------------");
+					console.log(token[1],"============");
 						const decode = await this.service.verifyAccessToken(token[1]);
+						console.log(decode);
+						
 						if (!decode) {
 							return res
 								.json({
 									code: 401,
 									message: "Token is invalid",
-									error: "Use valid refresh token",
+									error: "Token cannot be verified",
 									status: true
 								})
 								.status(401);
