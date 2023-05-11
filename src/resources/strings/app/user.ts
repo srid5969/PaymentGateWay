@@ -1,5 +1,7 @@
 const EMPTY_FIRST_NAME = "Please provide a first name";
 const INVALID_FIRST_NAME = "Name does must not contain any special characters or numbers";
+export const INVALID_NAME = "Name does must not contain any special characters or numbers";
+export const EMPTY_NAME = "Please provide a  name";
 
 const EMPTY_LAST_NAME = "Please provide a last name";
 const INVALID_LAST_NAME = "Last name must be less than constraint1 characters";

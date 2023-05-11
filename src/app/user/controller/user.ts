@@ -1,7 +1,9 @@
 import { HttpStatus, inject } from "@leapjs/common";
-import { Controller, Get, Post, Req, Res } from "@leapjs/router";
+import { Controller, Get, Post, Req, Res, UseBefore } from "@leapjs/router";
 import { Request, Response } from "express";
 import { UserService } from "../service/user";
+import validate from "common/middleware/validator";
+import { User } from 'app/user/model/user';
 
 @Controller("/user")
 export class UserController {
@@ -17,10 +19,11 @@ export class UserController {
     });
   }
   @Post("/login")
-  public login(@Req() req: Request, @Res() res: Response): void {
-    
+  public async login(@Req() req: Request, @Res() res: Response): Promise<Response> {
+    return res.send("hello")
   }
   @Post("/signup")
+  @UseBefore(validate(User,["create"]))
   public async signUp(
     @Req() req: Request,
     @Res() res: Response

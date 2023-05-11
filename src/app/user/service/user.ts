@@ -13,10 +13,17 @@ export class UserService {
     data.password = await bcrypt.hash(data.password, salt);
     return new Promise<User | any>(async (resolve, reject) => {
       try {
+
         const Data = new UserModel(data);
+        const d=await UserModel.find()
+        console.log(d);
+        
         const saveUser = await Data.save();
+        
         resolve(saveUser);
       } catch (error) {
+        console.log(error);
+        
         reject({ statusCode: 403, message: error });
       }
     });

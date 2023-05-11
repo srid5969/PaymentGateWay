@@ -1,33 +1,34 @@
-import {Middleware, UseBefore} from "@leapjs/router";
-import {NextFunction, Response} from "express";
-import {TokenModel, UsersToken} from "common/userSession/model/usersToken";
-import {inject} from "@leapjs/common";
-import {UserSessionService} from "common/userSession/service/userSession";
-import Authentication from "./auth";
+import { inject } from "@leapjs/common";
+import { Middleware } from "@leapjs/router";
+import { TokenModel, UsersToken } from "common/userSession/model/usersToken";
+import { UserSessionService } from "common/userSession/service/userSession";
+import { configurations } from "configuration/manager";
+import { NextFunction, Response } from "express";
 
-@UseBefore(Authentication)
 @Middleware()
 export class AuthMiddleware {
 	@inject(UserSessionService)
 	private service!: UserSessionService;
 
-    @UseBefore(Authentication)
 	public async before(
 		req: any,
 		res: Response,
 		next: NextFunction
 	): Promise<any> {
+		const signUp = configurations.apiPrefix || "" + "/user/signup";
+		const login = configurations.apiPrefix || "" + "/user/login";
+		const oauth = configurations.apiPrefix || "" + "/token/oauth";
 		switch (req.originalUrl) {
-			case "/user/signup":
+			case signUp:
 				//no need of authentication
 				next();
 				break;
 
-			case "/token/oauth":
+			case oauth:
 				//generate access token using refresh token
 				const refreshToken: string =
 					req.body.refreshToken || req.body.refresh_token;
-				const find: UsersToken = await TokenModel.findOne({
+				const find: UsersToken | null= await TokenModel.findOne({
 					refreshToken: refreshToken
 				});
 				if (!find) {
@@ -65,39 +66,43 @@ export class AuthMiddleware {
 					.status(200);
 
 				break;
-			case "/user/login":
+			case login:
 				next();
 
 				break;
 			default:
-                try {
-                    if(!req.headers.authorization){
-                        return res.send({
-                            message:"authorization missing"
-                        }).status(401)
-                    }
-                    const token: string[] =  req.headers.authorization.split(" ") || "";
-                    if(token[1]){
-				const decode = await this.service.verifyAccessToken(token[1]);
-				if (!decode) {
+				try {
+					if (!req.headers.authorization) {
+						return res
+							.send({
+								message: "authorization missing"
+							})
+							.status(401);
+					}
+					const token: string[] = req.headers.authorization.split(" ") || "";
+					if (token[1]) {
+						const decode = await this.service.verifyAccessToken(token[1]);
+						if (!decode) {
+							return res
+								.json({
+									code: 401,
+									message: "Token is invalid",
+									error: "Use valid refresh token",
+									status: true
+								})
+								.status(401);
+						}
+						req.user = decode.user;
+						return next();
+					}
 					return res
-						.json({
-							code: 401,
-							message: "Token is invalid",
-							error: "Use valid refresh token",
-							status: true
+						.send({
+							message: "no token found"
 						})
 						.status(401);
+				} catch (error) {
+					next(error);
 				}
-				req.user = decode.user;
-				return next();}
-                return res.send({
-                    message:"no token found"
-                }).status(401)
-                } catch (error) {
-                    next(error)
-                }
-				
 		}
 	}
 }
