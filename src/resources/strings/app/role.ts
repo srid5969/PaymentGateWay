@@ -1,0 +1,1 @@
+export const INVALID_NAME:string="invalid name"
