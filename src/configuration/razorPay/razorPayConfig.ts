@@ -1,8 +1,11 @@
-import {IRazorpayConfig} from "razorpay";
-import {RazorpayHeaders} from "razorpay/dist/types/api";
+import { configurations } from 'configuration/manager';
+import Razorpay from "razorpay";
 
-export class RazorpayConfig implements IRazorpayConfig {
-	public key_id!: string;
-	public key_secret?: string | undefined;
-	public headers?: RazorpayHeaders | undefined;
-}
+
+//RazorPayInstance
+
+const config={
+    key_id: configurations.razorPay.key_id,
+    key_secret: configurations.razorPay.key_secret,
+  }
+export const razorPayInstance = new Razorpay(config) 

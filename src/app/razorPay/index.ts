@@ -1,6 +1,6 @@
-import Razorpay,{IRazorpayConfig} from 'razorpay'
+import Razorpay from 'razorpay'
 
-const a:IRazorpayConfig={
+const a={
     key_id: 'YOUR_KEY_ID',
     key_secret: 'YOUR_KEY_SECRET',
   }
