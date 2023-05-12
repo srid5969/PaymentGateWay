@@ -3,6 +3,10 @@ import Razorpay from "razorpay";
 
 
 //RazorPayInstance
+export class RazorpayConfig{
+  key_id!:string
+  key_secret!:string
+}
 
 const config={
     key_id: configurations.razorPay.key_id,

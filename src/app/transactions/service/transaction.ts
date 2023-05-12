@@ -37,8 +37,8 @@ class TransactionService {
 		return await this.razorPay.fetchTransferOrder(orderId);
 	}
 
-	public async initializeTransaction(data: Orders.RazorpayOrderCreateRequestBody): Promise<ResponseReturnType> {
-		const result = await this.razorPay.initialize(data);
+	public async placeOrder(data: Orders.RazorpayOrderCreateRequestBody): Promise<ResponseReturnType> {
+		const result = await this.razorPay.createOrder(data);
 		return {
 			data: result,
 			error: null,

@@ -12,7 +12,7 @@ export class RazorPayOrder {
     fetchTransferOrder(orderId: string): Promise<Orders.RazorpayOrder>{
         return razorPayInstance.orders.fetchTransferOrder(orderId)
     }
-    initialize(data: Orders.RazorpayOrderCreateRequestBody | Orders.RazorpayTransferCreateRequestBody | Orders.RazorpayAuthorizationCreateRequestBody): Promise<Orders.RazorpayOrder>{
+    createOrder(data: Orders.RazorpayOrderCreateRequestBody | Orders.RazorpayTransferCreateRequestBody | Orders.RazorpayAuthorizationCreateRequestBody): Promise<Orders.RazorpayOrder>{
         return razorPayInstance.orders.create(data)
      }
 
