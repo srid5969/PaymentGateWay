@@ -33,8 +33,15 @@ class TransactionService {
 			}
 		});
 	}
-	public async getTransactionDetailByOrderId(orderId: string) {
-		return await this.razorPay.fetchTransferOrder(orderId);
+	public async getTransactionDetailByOrderId(orderId: string): Promise<ResponseReturnType>  {
+		const result = await this.razorPay.fetchTransferOrder(orderId);
+		return {
+			data: result,
+			error: null,
+			status: true,
+			message: "Success",
+			code: 200
+		};
 	}
 
 	public async placeOrder(data: Orders.RazorpayOrderCreateRequestBody): Promise<ResponseReturnType> {

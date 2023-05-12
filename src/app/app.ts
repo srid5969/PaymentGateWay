@@ -11,6 +11,7 @@ import morgan from "morgan";
 import ErrorHandler from "common/Handle-Error/error-handler";
 import mongoose from "mongoose";
 import { Logger } from "@leapjs/common";
+import { OrderController } from "./transactions/controller/orders";
 
 
 export default async function bootstrap(
@@ -33,7 +34,7 @@ export default async function bootstrap(
 			origin: configuration.corsWhitelistedDomains,
 			credentials: true
 		},
-		controllers: [AccessTokenGeneratorForRefreshToken, UserController],
+		controllers: [AccessTokenGeneratorForRefreshToken, UserController,OrderController],
 		beforeMiddlewares: [
 			helmet(),
 			json(acFilterAttributes),
