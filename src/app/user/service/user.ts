@@ -53,8 +53,7 @@ export class UserService {
 		return new Promise<User | any>(async (resolve, reject) => {
 			try {
 				const Data = new UserModel(data);
-				const d = await UserModel.find();
-				console.log(d);
+				
 
 				const saveUser = await Data.save();
 
