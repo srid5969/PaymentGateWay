@@ -1,13 +1,19 @@
-import { Controller } from "@leapjs/router";
-
+import {HttpStatus, inject} from "@leapjs/common";
+import {Body, Controller, Post, Req, Res} from "@leapjs/router";
+import {Response} from "express";
+import {TransactionService} from "../service/transaction";
 
 @Controller("/orders")
-export class OrderController{
-
-
-
-
-
-
-
+export class OrderController {
+	@inject(TransactionService)
+	transactionService!: TransactionService;
+	@Post("/pay")
+	public async postRequest(@Body() body: any, @Res() res: Response): Promise<Response> {
+		try {
+			const data = await this.transactionService.initializeTransaction(body);
+			return data.code ? res.status(data.code).json(data) : res.status(HttpStatus.ACCEPTED).send(data);
+		} catch (error: any) {
+			return error.code ? res.status(error.code).json(error) : res.status(HttpStatus.CONFLICT).send(error);
+		}
+	}
 }
