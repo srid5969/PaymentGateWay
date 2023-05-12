@@ -1,15 +1,13 @@
-import { configurations } from 'configuration/manager';
 import Razorpay from "razorpay";
 
-
 //RazorPayInstance
-export class RazorpayConfig{
-  key_id!:string
-  key_secret!:string
+export class RazorpayConfig {
+	key_id!: string;
+	key_secret!: string;
 }
 
-const config={
-    key_id: configurations.razorPay.key_id,
-    key_secret: configurations.razorPay.key_secret,
-  }
-export const razorPayInstance = new Razorpay(config) 
+const config = {
+	key_id: process.env.RAZOR_PAY_KEY_ID || "value",
+	key_secret: process.env.RAZOR_PAY_KEY_SECRET || ""
+};
+export const razorPayInstance = new Razorpay(config);

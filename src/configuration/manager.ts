@@ -18,6 +18,8 @@ class Configuration {
 	constructor() {
 		this.razorPay = new RazorpayConfig();
 		this.database = new Database();
+		this.razorPay.key_id = process.env.RAZOR_PAY_KEY_ID || "";
+		this.razorPay.key_secret = process.env.RAZOR_PAY_KEY_SECRET || "";
 	}
 	public setContext(application: LeapApplication): void {
 		this.application = application;
