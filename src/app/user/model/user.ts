@@ -18,7 +18,7 @@ class User {
 
 	@prop({required: true, unique: true})
 	@IsDefined({groups: ["login"], message: EMPTY_PHONE})
-	@IsPhoneNumber("IN", {groups: ["login"],message: INVALID_PHONE})
+	@IsPhoneNumber("IN", {groups: ["login"], message: INVALID_PHONE})
 	public phone!: number;
 
 	@prop({required: true, default: Roles.Employee})

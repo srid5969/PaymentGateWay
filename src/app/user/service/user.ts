@@ -87,7 +87,7 @@ export class UserService {
 			};
 		}
 		return {
-			code: HttpStatus.NON_AUTHORITATIVE_INFORMATION,
+			code: HttpStatus.NOT_ACCEPTABLE,
 			status: false,
 			message: "Otp  cannot verified",
 			error: null,
