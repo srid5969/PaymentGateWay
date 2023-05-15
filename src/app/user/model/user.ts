@@ -3,7 +3,7 @@ import {Expose} from "class-transformer";
 import {IsAlpha, IsDefined, IsEnum, IsPhoneNumber} from "class-validator";
 import {Roles} from "common/constants";
 import {ObjectId} from "mongodb";
-import {EMPTY_PASSWORD, EMPTY_PHONE} from "resources/strings/app/auth";
+import {EMPTY_PHONE} from "resources/strings/app/auth";
 import {INVALID_NAME} from "resources/strings/app/role";
 import {EMPTY_NAME, INVALID_PHONE} from "resources/strings/app/user";
 
@@ -12,13 +12,12 @@ class User {
 	public id?: ObjectId;
 
 	@prop({required: true, default: "Pending"})
-	@IsAlpha("en-US", {groups: ["create"], message: INVALID_NAME})
-	@IsDefined({groups: ["create"], message: EMPTY_NAME})
+	@IsAlpha("en-US", {groups: ["create"], message: EMPTY_NAME})
+	@IsDefined({groups: ["create"], message: INVALID_NAME})
 	public name?: string;
 
 	@prop({required: true, unique: true})
 	@IsDefined({groups: ["login"], message: EMPTY_PHONE})
-	@IsDefined({groups: ["create"], message: EMPTY_PHONE})
 	@IsPhoneNumber("IN", {message: INVALID_PHONE})
 	public phone!: number;
 
@@ -27,9 +26,8 @@ class User {
 	@IsEnum(Roles, {groups: ["create", "update"], message: INVALID_NAME})
 	public role!: string;
 
-	@prop({required: true, allowMixed: 0})
-	@IsDefined({groups: ["create"], message: EMPTY_PASSWORD})
-	public password!: string;
+	@prop({required: true, default: false})
+	public verified!: boolean;
 }
 
 const UserModel = getModelForClass(User, {

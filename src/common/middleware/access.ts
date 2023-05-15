@@ -1,21 +1,19 @@
-import { inject } from "@leapjs/common";
-import { Middleware } from "@leapjs/router";
-import { TokenModel, UsersToken } from "common/userSession/model/usersToken";
-import { UserSessionService } from "common/userSession/service/userSession";
-import { configurations } from "configuration/manager";
-import { NextFunction, Response } from "express";
+import {inject} from "@leapjs/common";
+import {Middleware} from "@leapjs/router";
+import {TokenModel, UsersToken} from "common/userSession/model/usersToken";
+import {UserSessionService} from "common/userSession/service/userSession";
+import {configurations} from "configuration/manager";
+import {NextFunction, Response} from "express";
 
 @Middleware()
 export class AuthMiddleware {
 	@inject(UserSessionService)
 	private service!: UserSessionService;
 
-	public async before(
-		req: any,
-		res: Response,
-		next: NextFunction
-	): Promise<any> {
+	public async before(req: any, res: Response, next: NextFunction): Promise<any> {
 		const signUp = configurations.apiPrefix || "" + "/user/signup";
+		const verifyOtp = configurations.apiPrefix || "" + "/user/verify-otp";
+
 		const login = configurations.apiPrefix || "" + "/user/login";
 		const oauth = configurations.apiPrefix || "" + "/token/oauth";
 		switch (req.originalUrl) {
@@ -23,12 +21,13 @@ export class AuthMiddleware {
 				//no need of authentication
 				next();
 				break;
-
+			case verifyOtp:
+				next();
+				break;
 			case oauth:
 				//generate access token using refresh token
-				const refreshToken: string =
-					req.body.refreshToken || req.body.refresh_token;
-				const find: UsersToken | null= await TokenModel.findOne({
+				const refreshToken: string = req.body.refreshToken || req.body.refresh_token;
+				const find: UsersToken | null = await TokenModel.findOne({
 					refreshToken: refreshToken
 				});
 				if (!find) {
@@ -42,12 +41,9 @@ export class AuthMiddleware {
 						.status(401);
 				}
 				//generate accessToken
-				const accessToken: string = await this.service.generateAccessToken(
-					find
-				);
+				const accessToken: string = await this.service.generateAccessToken(find);
 				//generate refreshToken
-				const generatedRefreshToken: string =
-					await this.service.generateRefreshToken();
+				const generatedRefreshToken: string = await this.service.generateRefreshToken();
 
 				//save refreshToken in database
 				const save = await this.service.saveToken({
@@ -80,14 +76,13 @@ export class AuthMiddleware {
 							.status(401);
 					}
 					const token: string[] = req.headers.authorization.split(" ") || "";
-					
-					
+
 					if (token[1]) {
-						console.log(req.headers.authorization,"----------------");
-					console.log(token[1],"============");
+						console.log(req.headers.authorization, "----------------");
+						console.log(token[1], "============");
 						const decode = await this.service.verifyAccessToken(token[1]);
 						console.log(decode);
-						
+
 						if (!decode) {
 							return res
 								.json({

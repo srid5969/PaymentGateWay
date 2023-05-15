@@ -1,7 +1,8 @@
 import {RazorpayConfig} from "configuration/razorPay/razorPayConfig";
 
 import {LeapApplication} from "@leapjs/core";
-import dotenv from "dotenv";
+import 
+ from "dotenv";
 import Database from "./database/config";
 
 class Configuration {
