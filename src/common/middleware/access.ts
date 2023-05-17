@@ -27,9 +27,9 @@ export class AuthMiddleware {
 			case oauth:
 				//generate access token using refresh token
 				const refreshToken: string = req.body.refreshToken || req.body.refresh_token;
-				const find: UsersToken | null = await TokenModel.findOne({
-					refreshToken: refreshToken
-				});
+				const find: UsersToken | null = await TokenModel.findOneAndUpdate({
+					refreshToken: refreshToken,expired:false
+				},{expired:true});
 				if (!find) {
 					return res
 						.json({
@@ -46,11 +46,10 @@ export class AuthMiddleware {
 				const generatedRefreshToken: string = await this.service.generateRefreshToken();
 
 				//save refreshToken in database
-				const save = await this.service.saveToken({
+				 await this.service.saveToken({
 					user: find.user,
 					refreshToken: generatedRefreshToken
 				});
-				console.log(save);
 				//send response to the user
 
 				res
@@ -78,10 +77,7 @@ export class AuthMiddleware {
 					const token: string[] = req.headers.authorization.split(" ") || "";
 
 					if (token[1]) {
-						console.log(req.headers.authorization, "----------------");
-						console.log(token[1], "============");
 						const decode = await this.service.verifyAccessToken(token[1]);
-						console.log(decode);
 
 						if (!decode) {
 							return res
