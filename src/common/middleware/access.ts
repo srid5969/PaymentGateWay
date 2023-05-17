@@ -4,12 +4,25 @@ import {TokenModel, UsersToken} from "common/userSession/model/usersToken";
 import {UserSessionService} from "common/userSession/service/userSession";
 import {configurations} from "configuration/manager";
 import {NextFunction, Response} from "express";
-
+/**
+ * @property - Bearer or Basic authorization token is used for authorization
+ * @class : Authorization
+ * @description The is an @OAuth 2.0 Authentication here the refresh and access token is given to the client
+ * every time the client access the api the client access token in authorization header starting with basic or bearer
+ *
+ */
 @Middleware()
 export class AuthMiddleware {
 	@inject(UserSessionService)
 	private service!: UserSessionService;
-
+	/**
+	 * @param {*} req
+	 * @param {Response} res
+	 * @param {NextFunction} next
+	 * @return {*}  {Promise<any>}
+	 * @phone_number_login direct access without authentication
+	 * @memberof AuthMiddleware
+	 */
 	public async before(req: any, res: Response, next: NextFunction): Promise<any> {
 		const signUp = configurations.apiPrefix || "" + "/user/signup";
 		const verifyOtp = configurations.apiPrefix || "" + "/user/verify-otp";
@@ -18,7 +31,6 @@ export class AuthMiddleware {
 		const oauth = configurations.apiPrefix || "" + "/token/oauth";
 		switch (req.originalUrl) {
 			case signUp:
-				//no need of authentication
 				next();
 				break;
 			case verifyOtp:
@@ -27,9 +39,13 @@ export class AuthMiddleware {
 			case oauth:
 				//generate access token using refresh token
 				const refreshToken: string = req.body.refreshToken || req.body.refresh_token;
-				const find: UsersToken | null = await TokenModel.findOneAndUpdate({
-					refreshToken: refreshToken,expired:false
-				},{expired:true});
+				const find: UsersToken | null = await TokenModel.findOneAndUpdate(
+					{
+						refreshToken: refreshToken,
+						expired: false
+					},
+					{expired: true}
+				);
 				if (!find) {
 					return res
 						.json({
@@ -46,7 +62,7 @@ export class AuthMiddleware {
 				const generatedRefreshToken: string = await this.service.generateRefreshToken();
 
 				//save refreshToken in database
-				 await this.service.saveToken({
+				await this.service.saveToken({
 					user: find.user,
 					refreshToken: generatedRefreshToken
 				});
