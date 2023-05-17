@@ -1,82 +1,96 @@
 import {HttpStatus, inject, injectable} from "@leapjs/common";
-import bcrypt from "bcrypt";
-import {User, UserModel} from "app/user/model/user";
+import {OTPService} from "app/otp/service/otp";
+import {UserModel} from "app/user/model/user";
 import {ResponseReturnType} from "common/response/responseTypes";
 import {UserSessionService} from "common/userSession/service/userSession";
-import { ObjectId } from "mongodb";
+import {ObjectId} from "mongodb";
 
 @injectable()
 export class UserService {
 	@inject(UserSessionService)
 	private service!: UserSessionService;
+	@inject(OTPService)
+	private otpService!: OTPService;
 
-	public async getUserDetailUsingId(_id:ObjectId): Promise<any> {
-		return Promise.resolve(await UserModel.findOne({_id}))
+	public async getUserDetailUsingId(_id: ObjectId): Promise<any> {
+		return Promise.resolve(await UserModel.findOne({_id}));
 	}
 
 	//login
-	public async login(
-		phone: string,
-		password: string
-	): Promise<ResponseReturnType> {
-		const user = await UserModel.findOne({phone}, {password: 1});
-		if (!user) {
+	public async login(phone: number): Promise<ResponseReturnType> {
+		const user = await UserModel.findOne({phone}, {id: 1});
+
+		if (!user) return await this.registeringMobile(phone);
+
+		const data = await this.otpService.generateOTP(phone, user);
+		return {
+			code: HttpStatus.OK,
+			data,
+			error: null,
+			message: "The otp has been sent successfully and the user verification is still pending",
+			status: true
+		};
+	}
+	public async registeringMobile(phone: number): Promise<ResponseReturnType | any> {
+		try {
+			const saveNumber = await new UserModel({
+				phone,
+				verified: false
+			}).save();
+
+			const token = await this.otpService.generateOTP(phone, saveNumber._id);
 			return {
-				code: HttpStatus.NOT_FOUND,
-				message: "user cannot be found",
-				error: "unknown user",
-				data: null,
+				code: 200,
+				existingUser: false,
+				message: "OTP has been successfully send",
+				data: token,
+				error: null,
 				status: true
 			};
+		} catch (error) {
+			return {
+				code: HttpStatus.UNPROCESSABLE_ENTITY,
+				message: "Trouble in paradise",
+				error,
+				data: null,
+				status: false
+			};
 		}
-		const accessToken = await this.service.generateAccessToken(user);
-		const refreshToken = await this.service.generateRefreshToken();
-		await this.service.saveToken({
-			refreshToken,
-			user: user._id
-		});
-		return {
-			code: 200,
-			status: true,
-			message: "Welcome",
-			data: {
+	}
+
+	public async verifyOTP(payload: any): Promise<ResponseReturnType> {
+		const {otp, token} = payload;
+		
+		const user: ObjectId | boolean = await this.otpService.verifyOTP(otp, token);
+
+		if (user) {
+			const userData = await UserModel.findOneAndUpdate({_id: user}, {verified: true});
+			const accessToken = await this.service.generateAccessToken(user);
+			const refreshToken = await this.service.generateRefreshToken();
+			await this.service.saveToken({
 				refreshToken,
-				accessToken
-			},
-			error: null
+				user: userData._id
+			});
+
+			return {
+				code: 200,
+				status: true,
+				message: "Welcome",
+				data: {
+					refreshToken,
+					accessToken
+				},
+				error: null
+			};
+		}
+		return {
+			code: HttpStatus.NOT_ACCEPTABLE,
+			status: false,
+			message: "Otp  cannot verified",
+			error: null,
+			data: null
 		};
 	}
 
-	public async userSignUp(data: User): Promise<User | any> {
-		const salt = await bcrypt.genSalt(10);
-		data.password = await bcrypt.hash(data.password, salt);
-		return new Promise<User | any>(async (resolve, reject) => {
-			try {
-				const Data = new UserModel(data);
-				
-
-				const saveUser = await Data.save();
-
-				resolve(saveUser);
-			} catch (error) {
-				console.log(error);
-
-				reject({statusCode: 403, message: error});
-			}
-		});
-	}
-	public async sentOTP(phone: number): Promise<void> {
-		let otp = 1234;
-		console.log(otp);
-	}
-	public async checkUserPhoneNumber(phone: number): Promise<boolean> {
-		return new Promise<boolean>(async (resolve, reject) => {
-			const registeredUser = await UserModel.findOne({phone: phone});
-			if (registeredUser) {
-				return resolve(true);
-			}
-			return resolve(false);
-		});
-	}
 	public async forgotPassword() {}
 }
