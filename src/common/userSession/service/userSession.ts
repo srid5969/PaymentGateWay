@@ -13,7 +13,7 @@ export class UserSessionService {
 			user: userData._id || userData.user,
 			exp: Date.now() + 60 * 60 * 24,
 			iat: Date.now(),
-			iss: "britis-empire",
+			iss: "british-empire",
 			sub: "access_token"
 		};
 		const token = jsonwebtoken.sign(payload, configurations.jwtSecret);

@@ -19,7 +19,6 @@ export class UserService {
 	//login
 	public async login(phone: number): Promise<ResponseReturnType> {
 		const user = await UserModel.findOne({phone}, {id: 1});
-		console.log(user);
 
 		if (!user) return await this.registeringMobile(phone);
 
@@ -61,10 +60,8 @@ export class UserService {
 
 	public async verifyOTP(payload: any): Promise<ResponseReturnType> {
 		const {otp, token} = payload;
-		console.log(payload);
 		
 		const user: ObjectId | boolean = await this.otpService.verifyOTP(otp, token);
-		console.log("if user", user);
 
 		if (user) {
 			const userData = await UserModel.findOneAndUpdate({_id: user}, {verified: true});

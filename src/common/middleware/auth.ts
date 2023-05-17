@@ -24,7 +24,6 @@ class Authentication {
 				const user: Jwt | JwtPayload | string = await verify(token[1], configurations.jwtSecret || "");
 				if (user) {
 					req.user = user
-					console.log("mile", user);
 
 					return next();
 				}
